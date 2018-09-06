@@ -5,4 +5,4 @@ Kernel Treelet is an algorithm by combining Kernel Method and Treelet algorithm.
 
 For more infomation about Kernel Method, see https://en.wikipedia.org/wiki/Kernel_method
 
-For more infomation about Treelet By Ann B. Lee, Boaz Nadler and Larry Wasserman, see https://arxiv.org/pdf/0707.0481.pdf
+For more infomation about Treelet by Ann B. Lee, Boaz Nadler and Larry Wasserman, see https://arxiv.org/pdf/0707.0481.pdf
