@@ -9,8 +9,7 @@ class kernel_treelet:
 		self.kernel_name = kernel
 		self._kernel = self._input_kernel(kernel)
 		self.__dict__.update(kwargs)
-		self.coef_name = ['gamma', 'sigma', 'coef0', 'degree']
-		self.coef_dict = {k: self.__dict__[k] for k in self.coef_name if k in self.__dict__}
+		self.coef_dict = kwargs
 
 		# Intermediate Variables
 		self._trl = treelet.treelet()
