@@ -153,8 +153,9 @@ for i_dataset, (dataset, algo_params) in enumerate(datasets):
     kta = kernel_treelet_clustering(kernel='rbf', sigma=0.2,
                                    max_sample=500, label_type=int,
                                    )
+    ktp = kernel_treelet_clustering(kernel='poly', d=0.1, pow=2, number_of_clusters=params['n'])
 
-    clustering_algorithms = (
+    other_alg = [
         ('MiniBatchKMeans', two_means),
         ('AffinityPropagation', affinity_propagation),
         ('MeanShift', ms),
@@ -164,10 +165,15 @@ for i_dataset, (dataset, algo_params) in enumerate(datasets):
         ('DBSCAN', dbscan),
         ('Birch', birch),
         ('GaussianMixture', gmm),
-        ('KT', kte),
-        ('KTdropout', ktd),
-        ('KTauto', kta)
-    )
+        #('KT', kte),
+        #('KTdropout', ktd),
+        #('KTauto', kta),
+        ('KTpoly', ktp),
+    ]
+
+    KT_alg = [kte, ktd, kta, ktp]
+
+    clustering_algorithms = other_alg
 
     for name, algorithm in clustering_algorithms:
         t0 = time.time()
@@ -211,6 +217,7 @@ for i_dataset, (dataset, algo_params) in enumerate(datasets):
                  horizontalalignment='right')
         plot_num += 1
         if isinstance(algorithm, kernel_treelet_clustering):
-            high_dim_plot(algorithm.Delta_k, algorithm.sample_labels)
+            #high_dim_plot(algorithm.Delta_k, algorithm.sample_labels)
+            pass
 
 plt.show()

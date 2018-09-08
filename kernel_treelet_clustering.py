@@ -47,6 +47,7 @@ class kernel_treelet_clustering(kernel_treelet):
 			self.dataset = self.dataset[self.sample_index, :]
 			self.fit(self.dataset, k)
 			from sklearn.svm import SVC
+			gamma = self.gamma
 			self.svm = SVC(kernel=self.kernel_name)
 			self.svm.fit(self.dataset, self.labels_)
 			self.labels_ = self.svm.predict(self.raw_dataset)

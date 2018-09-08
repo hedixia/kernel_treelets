@@ -7,8 +7,10 @@ class kernel_treelet:
 	def __init__ (self, kernel=False, **kwargs):
 		# Input Variables
 		self.kernel_name = kernel
-		self._ker_ = self._kernel(kernel)
+		self._kernel = self._input_kernel(kernel)
 		self.__dict__.update(kwargs)
+		self.coef_name = ['gamma', 'sigma', 'coef0', 'degree']
+		self.coef_dict = {k: self.__dict__[k] for k in self.coef_name if k in self.__dict__}
 
 		# Intermediate Variables
 		self._trl = treelet.treelet()
@@ -73,9 +75,9 @@ class kernel_treelet:
 		return L
 
 	def _kernel_matrix_function (self, x, y):
-		return self._ker_(self.__X[x, :], self.__X[y, :])
+		return self._kernel(self.__X[x, :], self.__X[y, :])
 
-	def _kernel (self, kernel):  # return a kernel function f:SxS->R
+	def _input_kernel (self, kernel):  # return a kernel function f:SxS->R
 		if kernel == "rbf":
 			kernel = self._rbf
 		if kernel == "poly":
@@ -83,17 +85,20 @@ class kernel_treelet:
 		return kernel
 
 	@property
-	def __twosigmasq (self):
-		if not hasattr(self, "_twosigmasq"):
-			self._twosigmasq = 2 * self.sigma * self.sigma
-		return self._twosigmasq
+	def gamma (self):
+		if hasattr(self, '_gamma_'):
+			return self._gamma_
+		if hasattr(self, 'sigma'):
+			self._gamma_ = 1 / 2 / self.sigma / self.sigma
+
+		return self._gamma_
 
 	def _rbf (self, x, y):  # Radial Basis Function Kernel
 		diff = np.linalg.norm(np.asarray(x) - np.asarray(y), axis=-1)
-		return np.exp(- diff * diff / self.__twosigmasq)
+		return np.exp(- diff * diff * self.gamma)
 
-	def _poly (self, x, y): # Polynomial Kernel
-		return ((np.asarray(x) * np.asarray(y)).sum(axis=-1) + self.d) ** self.pow
+	def _poly (self, x, y):  # Polynomial Kernel
+		return ((np.asarray(x) * np.asarray(y)).sum(axis=-1) * self.gamma + self.coef0) ** self.degree
 
 
 KT = kernel_treelet
