@@ -1,9 +1,12 @@
+import inspect
 import itertools
 
 import numpy as np
 from sklearn.svm import SVC
 
 from kernel_treelet import kernel_treelet
+
+SVCkeys = inspect.signature(SVC.__init__).parameters.keys()
 
 
 class kernel_treelet_clustering(kernel_treelet):
@@ -32,9 +35,9 @@ class kernel_treelet_clustering(kernel_treelet):
 		self.raw_dataset = None
 
 	def fit (self, X, k=-1):
-
-		if len(self) <= self.max_sample:  # small dataset
-			self.dataset = np.asmatrix(X)
+		X = np.asmatrix(X)
+		if X.shape[0] <= self.max_sample:  # small dataset
+			self.dataset = X
 			super().fit(self.dataset, k)
 
 			# clustering on sample dataset
@@ -47,11 +50,12 @@ class kernel_treelet_clustering(kernel_treelet):
 			self._switch_label_type()
 
 		else:  # large dataset
-			self.raw_dataset = np.asmatrix(X)  # origional copy
+			self.raw_dataset = X  # origional copy
 			self.sample_index = np.arange(self.max_sample)  # sampling
 			self.dataset = self.raw_dataset[self.sample_index, :]  # small sample
 			self.fit(self.dataset, k)  # model on sample dataset
-			self.svm = SVC(kernel=self.kernel_name, **self.coef_dict)
+			coef_dict = {key: self.coef_dict[key] for key in self.coef_dict if key in SVCkeys}
+			self.svm = SVC(kernel=self.kernel_name, **coef_dict)
 			self.svm.fit(self.dataset, self.labels_)
 			self.labels_ = self.svm.predict(self.raw_dataset)
 

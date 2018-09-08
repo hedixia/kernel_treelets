@@ -153,7 +153,7 @@ for i_dataset, (dataset, algo_params) in enumerate(datasets):
     kta = kernel_treelet_clustering(kernel='rbf', sigma=0.2,
                                    max_sample=500, label_type=int,
                                    )
-    ktp = kernel_treelet_clustering(kernel='poly', d=0.1, pow=2, number_of_clusters=params['n'])
+    ktp = kernel_treelet_clustering(kernel='poly', sigma=1, degree=2, coef0=1, number_of_clusters=params['n'])
 
     other_alg = [
         ('MiniBatchKMeans', two_means),
