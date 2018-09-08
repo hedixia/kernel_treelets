@@ -6,7 +6,7 @@ import treelet
 class kernel_treelet:
 	def __init__ (self, kernel=False, **kwargs):
 		# Input Variables
-		self.kernel_name = kernel
+		self.kernel_name = kernel if kernel else 'linear'
 		self._kernel = self._input_kernel(kernel)
 		self.__dict__.update(kwargs)
 		self.coef_dict = kwargs
@@ -81,6 +81,8 @@ class kernel_treelet:
 			kernel = self._rbf
 		if kernel == "poly":
 			kernel = self._poly
+		if kernel == False:
+			kernel = self._linear
 		return kernel
 
 	@property
@@ -91,6 +93,10 @@ class kernel_treelet:
 			self._gamma_ = 1 / 2 / self.sigma / self.sigma
 
 		return self._gamma_
+
+	@staticmethod
+	def _linear (x, y):  # Linear Kernel
+		return (np.asarray(x) * np.asarray(y)).sum(axis=-1)
 
 	def _rbf (self, x, y):  # Radial Basis Function Kernel
 		diff = np.linalg.norm(np.asarray(x) - np.asarray(y), axis=-1)

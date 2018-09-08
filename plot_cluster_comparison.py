@@ -34,21 +34,23 @@ from sklearn import cluster, datasets, mixture
 from sklearn.neighbors import kneighbors_graph
 from sklearn.preprocessing import StandardScaler
 from itertools import cycle, islice
-from kernel_treelet_clustering import  kernel_treelet_clustering
+from kernel_treelet_clustering import kernel_treelet_clustering
 from sklearn.decomposition import PCA
 
 cmaps = [
-        'flag', 'prism', 'ocean', 'gist_earth', 'terrain', 'gist_stern',
-        'gnuplot', 'gnuplot2', 'CMRmap', 'cubehelix', 'brg', 'hsv',
-        'gist_rainbow', 'rainbow', 'jet', 'nipy_spectral', 'gist_ncar']
+	'flag', 'prism', 'ocean', 'gist_earth', 'terrain', 'gist_stern',
+	'gnuplot', 'gnuplot2', 'CMRmap', 'cubehelix', 'brg', 'hsv',
+	'gist_rainbow', 'rainbow', 'jet', 'nipy_spectral', 'gist_ncar']
 
-def high_dim_plot(M, c):
-    pca = PCA(n_components=2)
-    points = np.transpose(pca.fit_transform(M))
-    #points = np.asarray(M[:,:2])
-    sp = plt.subplot(111)
-    sp.scatter(points[0], points[1], c=c)
-    plt.show()
+
+def high_dim_plot (M, c):
+	pca = PCA(n_components=2)
+	points = np.transpose(pca.fit_transform(M))
+	# points = np.asarray(M[:,:2])
+	sp = plt.subplot(111)
+	sp.scatter(points[0], points[1], c=c)
+	plt.show()
+
 
 np.random.seed(0)
 
@@ -92,132 +94,152 @@ default_base = {'quantile': .3,
                 'n_clusters': 3}
 
 datasets = [
-    (noisy_circles, {'damping': .77, 'preference': -240,
-                     'quantile': .2, 'n_clusters': 2, 'n' : 2}),
-    (noisy_moons, {'damping': .75, 'preference': -220, 'n_clusters': 2, 'n' : 2}),
-    (varied, {'eps': .18, 'n_neighbors': 2, 'n' : 3}),
-    (aniso, {'eps': .15, 'n_neighbors': 2, 'n' : 6}),
-    (blobs, {'n' : 3}),
-    (no_structure, {'n' : 3})]
+	(noisy_circles, {'damping': .77, 'preference': -240, 'quantile': .2, 'n_clusters': 2, 'n': 2}),
+	(noisy_moons, {'damping': .75, 'preference': -220, 'n_clusters': 2, 'n': 2}),
+	(varied, {'eps': .18, 'n_neighbors': 2, 'n': 6}),
+	(aniso, {'eps': .15, 'n_neighbors': 2, 'n': 6}),
+	(blobs, {'n': 3}),
+	(no_structure, {'n': 3})
+]
 
 for i_dataset, (dataset, algo_params) in enumerate(datasets):
-    # update parameters with dataset-specific values
-    params = default_base.copy()
-    params.update(algo_params)
+	# update parameters with dataset-specific values
+	params = default_base.copy()
+	params.update(algo_params)
 
-    X, y = dataset
-    print(X.shape)
-    # normalize dataset for easier parameter selection
-    X = StandardScaler().fit_transform(X)
+	X, y = dataset
+	print(X.shape)
+	# normalize dataset for easier parameter selection
+	X = StandardScaler().fit_transform(X)
 
-    # estimate bandwidth for mean shift
-    bandwidth = cluster.estimate_bandwidth(X, quantile=params['quantile'])
+	# estimate bandwidth for mean shift
+	bandwidth = cluster.estimate_bandwidth(X, quantile=params['quantile'])
 
-    # connectivity matrix for structured Ward
-    connectivity = kneighbors_graph(
-        X, n_neighbors=params['n_neighbors'], include_self=False)
-    # make connectivity symmetric
-    connectivity = 0.5 * (connectivity + connectivity.T)
+	# connectivity matrix for structured Ward
+	connectivity = kneighbors_graph(
+		X, n_neighbors=params['n_neighbors'], include_self=False)
+	# make connectivity symmetric
+	connectivity = 0.5 * (connectivity + connectivity.T)
 
-    # ============
-    # Create cluster objects
-    # ============
-    ms = cluster.MeanShift(bandwidth=bandwidth, bin_seeding=True)
-    two_means = cluster.MiniBatchKMeans(n_clusters=params['n_clusters'])
-    ward = cluster.AgglomerativeClustering(
-        n_clusters=params['n_clusters'], linkage='ward',
-        connectivity=connectivity)
-    spectral = cluster.SpectralClustering(
-        n_clusters=params['n_clusters'], eigen_solver='arpack',
-        affinity="nearest_neighbors")
-    dbscan = cluster.DBSCAN(eps=params['eps'])
-    affinity_propagation = cluster.AffinityPropagation(
-        damping=params['damping'], preference=params['preference'])
-    average_linkage = cluster.AgglomerativeClustering(
-        linkage="average", affinity="cityblock",
-        n_clusters=params['n_clusters'], connectivity=connectivity)
-    birch = cluster.Birch(n_clusters=params['n_clusters'])
-    gmm = mixture.GaussianMixture(
-        n_components=params['n_clusters'], covariance_type='full')
-    kte = kernel_treelet_clustering(kernel='rbf', sigma=0.2,
-                                    max_sample=500, label_type=int,
-                                    number_of_clusters=params['n'],
-                                    )
+	# ============
+	# Create cluster objects
+	# ============
+	ms = cluster.MeanShift(bandwidth=bandwidth, bin_seeding=True)
+	two_means = cluster.MiniBatchKMeans(n_clusters=params['n_clusters'])
+	ward = cluster.AgglomerativeClustering(
+		n_clusters=params['n_clusters'], linkage='ward',
+		connectivity=connectivity)
+	spectral = cluster.SpectralClustering(
+		n_clusters=params['n_clusters'], eigen_solver='arpack',
+		affinity="nearest_neighbors")
+	dbscan = cluster.DBSCAN(eps=params['eps'])
+	affinity_propagation = cluster.AffinityPropagation(
+		damping=params['damping'], preference=params['preference'])
+	average_linkage = cluster.AgglomerativeClustering(
+		linkage="average", affinity="cityblock",
+		n_clusters=params['n_clusters'], connectivity=connectivity)
+	birch = cluster.Birch(n_clusters=params['n_clusters'])
+	gmm = mixture.GaussianMixture(
+		n_components=params['n_clusters'], covariance_type='full')
+	kt = kernel_treelet_clustering(number_of_clusters=params['n'], label_type=int, )
+	kte = kernel_treelet_clustering(kernel='rbf', sigma=0.2,
+	                                max_sample=500, label_type=int,
+	                                number_of_clusters=params['n'],
+	                                )
 
-    ktd = kernel_treelet_clustering(kernel='rbf', sigma=0.2,
-                                   max_sample=500, label_type=int,
-                                   number_of_clusters=params['n_clusters'],
-                                   dropout=2
-                                   )
+	ktd0 = kernel_treelet_clustering(kernel='rbf', sigma=0.2,
+	                                 max_sample=500, label_type=int,
+	                                 number_of_clusters=params['n_clusters'],
+	                                 dropout=0
+	                                 )
+	ktd1 = kernel_treelet_clustering(kernel='rbf', sigma=0.2,
+	                                 max_sample=500, label_type=int,
+	                                 number_of_clusters=params['n_clusters'],
+	                                 dropout=1
+	                                 )
+	ktd10 = kernel_treelet_clustering(kernel='rbf', sigma=0.2,
+	                                  max_sample=500, label_type=int,
+	                                  number_of_clusters=params['n_clusters'],
+	                                  dropout=10
+	                                  )
 
-    kta = kernel_treelet_clustering(kernel='rbf', sigma=0.2,
-                                   max_sample=500, label_type=int,
-                                   )
-    ktp = kernel_treelet_clustering(kernel='poly', sigma=1, degree=2, coef0=1, number_of_clusters=params['n'])
+	kta = kernel_treelet_clustering(kernel='rbf', sigma=0.2,
+	                                max_sample=500, label_type=int,
+	                                )
+	ktp = kernel_treelet_clustering(kernel='poly', sigma=1, degree=2, coef0=1, number_of_clusters=params['n'], label_type=int, )
 
-    other_alg = [
-        ('MiniBatchKMeans', two_means),
-        ('AffinityPropagation', affinity_propagation),
-        ('MeanShift', ms),
-        ('SpectralClustering', spectral),
-        ('Ward', ward),
-        ('AgglomerativeClustering', average_linkage),
-        ('DBSCAN', dbscan),
-        ('Birch', birch),
-        ('GaussianMixture', gmm),
-        #('KT', kte),
-        #('KTdropout', ktd),
-        #('KTauto', kta),
-        ('KTpoly', ktp),
-    ]
+	other_alg = [
+		('MiniBatchKMeans', two_means),
+		('AffinityPropagation', affinity_propagation),
+		('MeanShift', ms),
+		('SpectralClustering', spectral),
+		('Ward', ward),
+		('AgglomerativeClustering', average_linkage),
+		('DBSCAN', dbscan),
+		('Birch', birch),
+		('GaussianMixture', gmm),
 
-    KT_alg = [kte, ktd, kta, ktp]
+	]
 
-    clustering_algorithms = other_alg
+	KT_alg = [
+		# ('KT', kt),
+		('KTrbf', kte),
+		('KTdropout0', ktd0),
+		('KTdropout1', ktd1),
+		('KTdropout10', ktd10),
+		('KTauto', kta),
+		# ('KTpoly', ktp),
+	]
 
-    for name, algorithm in clustering_algorithms:
-        t0 = time.time()
+	# clustering_algorithms = other_alg + KT_alg
+	clustering_algorithms = other_alg[:0] + KT_alg
 
-        # catch warnings related to kneighbors_graph
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                message="the number of connected components of the " +
-                "connectivity matrix is [0-9]{1,2}" +
-                " > 1. Completing it to avoid stopping the tree early.",
-                category=UserWarning)
-            warnings.filterwarnings(
-                "ignore",
-                message="Graph is not fully connected, spectral embedding" +
-                " may not work as expected.",
-                category=UserWarning)
-            algorithm.fit(X)
-        t1 = time.time()
-        if hasattr(algorithm, 'labels_'):
-            y_pred = algorithm.labels_.astype(np.int)
-        else:
-            y_pred = algorithm.predict(X)
+	for name, algorithm in clustering_algorithms:
+		t0 = time.time()
 
-        plt.subplot(len(datasets), len(clustering_algorithms), plot_num)
-        if i_dataset == 0:
-            plt.title(name, size=12)
+		# catch warnings related to kneighbors_graph
+		with warnings.catch_warnings():
+			warnings.filterwarnings(
+				"ignore",
+				message="the number of connected components of the " +
+				        "connectivity matrix is [0-9]{1,2}" +
+				        " > 1. Completing it to avoid stopping the tree early.",
+				category=UserWarning)
+			warnings.filterwarnings(
+				"ignore",
+				message="Graph is not fully connected, spectral embedding" +
+				        " may not work as expected.",
+				category=UserWarning)
+			algorithm.fit(X)
+		t1 = time.time()
+		if hasattr(algorithm, 'labels_'):
+			y_pred = algorithm.labels_.astype(np.int)
+		else:
+			y_pred = algorithm.predict(X)
 
-        colors = np.array(list(islice(cycle(['#377eb8', '#ff7f00', '#4daf4a',
-                                             '#f781bf', '#a65628', '#984ea3',
-                                             '#999999', '#e41a1c', '#dede00']),
-                                      int(max(y_pred) + 1))))
-        plt.scatter(X[:, 0], X[:, 1], s=10, color=colors[y_pred])
+		plt.subplot(len(datasets), len(clustering_algorithms), plot_num)
+		if i_dataset == 0:
+			plt.title(name, size=12)
 
-        plt.xlim(-2.5, 2.5)
-        plt.ylim(-2.5, 2.5)
-        plt.xticks(())
-        plt.yticks(())
-        plt.text(.99, .01, ('%.2fs' % (t1 - t0)).lstrip('0'),
-                 transform=plt.gca().transAxes, size=15,
-                 horizontalalignment='right')
-        plot_num += 1
-        if isinstance(algorithm, kernel_treelet_clustering):
-            #high_dim_plot(algorithm.Delta_k, algorithm.sample_labels)
-            pass
+		colors = np.array(list(islice(cycle(['#377eb8', '#ff7f00', '#4daf4a',
+		                                     '#f781bf', '#a65628', '#984ea3',
+		                                     '#999999', '#e41a1c', '#dede00']),
+		                              int(max(y_pred) + 1))))
+		plt.scatter(X[:, 0], X[:, 1], s=10, color=colors[y_pred])
+
+		plt.xlim(-2.5, 2.5)
+		plt.ylim(-2.5, 2.5)
+		plt.xticks(())
+		plt.yticks(())
+		plt.text(.99, .01, ('%.2fs' % (t1 - t0)).lstrip('0'),
+		         transform=plt.gca().transAxes, size=15,
+		         horizontalalignment='right')
+		plot_num += 1
+		if isinstance(algorithm, kernel_treelet_clustering):
+			# high_dim_plot(algorithm.Delta_k, algorithm.sample_labels)
+			print(algorithm.number_of_clusters)
+			from collections import Counter
+
+			print(Counter(algorithm._labels_))
 
 plt.show()

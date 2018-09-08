@@ -30,7 +30,7 @@ class kernel_treelet_clustering(kernel_treelet):
 		self.tree = None
 		self.sample_index = None
 		self.sample_labels = None
-		self.labels_ = None
+		self._labels_ = None
 		self.svm = None
 		self.raw_dataset = None
 
@@ -45,9 +45,8 @@ class kernel_treelet_clustering(kernel_treelet):
 			if self.clustnum_estimate:
 				self.find_clust_num(self._trl.dendrogram_list)
 
-			self.labels_ = self._del_small_clust()
-			self.sample_labels = np.array(self.labels_, copy=True)
-			self._switch_label_type()
+			self._labels_ = self._del_small_clust()
+			self.sample_labels = np.array(self._labels_, copy=True)
 
 		else:  # large dataset
 			self.raw_dataset = X  # origional copy
@@ -56,8 +55,8 @@ class kernel_treelet_clustering(kernel_treelet):
 			self.fit(self.dataset, k)  # model on sample dataset
 			coef_dict = {key: self.coef_dict[key] for key in self.coef_dict if key in SVCkeys}
 			self.svm = SVC(kernel=self.kernel_name, **coef_dict)
-			self.svm.fit(self.dataset, self.labels_)
-			self.labels_ = self.svm.predict(self.raw_dataset)
+			self.svm.fit(self.dataset, self._labels_)
+			self._labels_ = self.svm.predict(self.raw_dataset)
 
 	def find_clust_num (self, dendrogram_list):
 		# find the first gap with 1
@@ -89,19 +88,20 @@ class kernel_treelet_clustering(kernel_treelet):
 					self._del_small_clust()
 		return temp_labels
 
-	def _switch_label_type (self):
-		if self.label_type == None:
-			return
-		if self.label_type == int:
-			temp_dict = {v: k for k, v in enumerate(np.unique(self.labels_), 0)}
-			self.labels_ = np.vectorize(temp_dict.__getitem__)(self.labels_)
-			return
+	@property
+	def labels_ (self):
+		if self.label_type is None:
+			pass
+		elif self.label_type == int:
+			temp_dict = {v: k for k, v in enumerate(np.unique(self._labels_), 0)}
+			self._labels_ = np.vectorize(temp_dict.__getitem__)(self._labels_)
 		else:
-			temp_dict = {v: k for k, v in enumerate(np.unique(self.labels_), 0)}
+			temp_dict = {v: k for k, v in enumerate(np.unique(self._labels_), 0)}
 			temp_list = itertools.islice(self.label_type, len(temp_dict))
 			tempf = lambda x: temp_list[temp_dict[x]]
-			self.labels_ = np.apply_along_axis(np.vectorize(tempf), 0, self.labels_)
-			return
+			self._labels_ = np.apply_along_axis(np.vectorize(tempf), 0, self._labels_)
+
+		return self._labels_
 
 	def __len__ (self):
 		return self.dataset.shape[0]
