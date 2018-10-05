@@ -10,8 +10,8 @@ SVCkeys = inspect.signature(SVC.__init__).parameters.keys()
 
 
 class kernel_treelet_clustering(kernel_treelet):
-	def __init__ (self, kernel=False, number_of_clusters=0, max_sample=500, dropout=0, label_type=None, **kwargs):
-		super().__init__(kernel, **kwargs)
+	def __init__ (self, kernel=False, number_of_clusters=0, max_sample=500, dropout=0, label_type=None, verbose=False, **kwargs):
+		super().__init__(kernel, verbose=verbose, **kwargs)
 		self.max_sample = max_sample
 		self.dropout = dropout
 		self.tiny_cluster_number = 0

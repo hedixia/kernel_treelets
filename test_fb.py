@@ -26,13 +26,13 @@ class network_kernel:
 		X[np.diag_indices_from(X)] = self.diag
 		return X
 
-
+core = 5
 timelist.append(time.time())
-ktc = kernel_treelet_clustering(network_kernel(5), number_of_clusters=30, max_sample=500)
+ktc = kernel_treelet_clustering(network_kernel(core), number_of_clusters=30, max_sample=4039, verbose=True)
 ktc.fit(adjmat)
 timelist.append(time.time())
 print(ktc.labels_)
 print(Counter(ktc.labels_))
 print(np.diff(timelist))
-with open("ktc_fb", "wb") as output:
+with open(r"C:\Users\Hedi Xia\Desktop\temp\ktc_fb"+str(core), "wb") as output:
 	pickle.dump(ktc, output)

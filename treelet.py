@@ -34,10 +34,9 @@ def jacobi_rotation (M, k, l, tol=0.00000000001):
 
 
 class treelet:
-	def __init__ (self, psi=False):
-		self.psi = psi if psi else treelet.default_psi
+	def __init__ (self, verbose=False):
 		self.n = 0
-		self.__X = None
+		self.verbose = verbose
 		self.M_ = None
 		self.max_row = None
 		self.root = None
@@ -68,26 +67,24 @@ class treelet:
 		return self._layer
 
 	def fit (self, X):
-		self.__X = np.asmatrix(X)
-		self.M_ = np.asmatrix(np.fromfunction(np.vectorize(self.phi), self.__X.shape, dtype=int))
-		self.n = self.__X.shape[0]
+		self.M_ = np.asarray(X)
+		self.n = self.M_.shape[0]
 		self.active = np.ones(self.n, dtype=bool)
 		self.max_row = np.zeros(self.n, dtype=int)
 		self._rotate(self.n - 1)
 		self.root = self.max_row[np.nonzero(self.active)[0][0]]
 
-	def phi (self, x, y):
-		return self.psi(self.__X[x, y], self.__X[x, x], self.__X[y, y])
-
 	def _rotate (self, multi=False):
 		if multi:
-			for _ in range(multi):
+			for i in range(multi):
+				if self.verbose:
+					print("rotation: ", i)
 				self._rotate()
 			self.dfrk = [self.transform_list[i][1] for i in range(self.n - 1)]
 			self.dfrk.append(self.transform_list[-1][0])
 		else:
 			(p, q) = self._find()
-			(cos_val, sin_val) = jacobi_rotation(self.__X, p, q)
+			(cos_val, sin_val) = jacobi_rotation(self.M_, p, q)
 			self._record(p, q, cos_val, sin_val)
 
 	def _find (self):
@@ -114,34 +111,17 @@ class treelet:
 		return self.max_row[k], k
 
 	def _max (self, col_num):
-		temp_max_row = 0
-		max_temp = 0
-		for i in self.active_list:
-			if i == col_num:
-				continue
-			temp = self.M_[i, col_num]
-			if temp >= max_temp:
-				temp_max_row = i
-				max_temp = temp
-		self.max_row[col_num] = temp_max_row
-		self.max_row_val[col_num] = max_temp
+		temp = np.abs(self.M_[col_num] * self.active)
+		temp[col_num] = 0
+		self.max_row[col_num] = np.argmax(temp)
+		self.max_row_val[col_num] = self.M_[self.max_row[col_num], col_num]
 
 	def _record (self, l, k, cos_val, sin_val):
-		if self.__X[l, l] < self.__X[k, k]:
+		if self.M_[l, l] < self.M_[k, k]:
 			self.current = (k, l, cos_val, sin_val)
 		else:
 			self.current = (l, k, cos_val, sin_val)
 
-		sca_ind = self.current[0]
-		dif_ind = self.current[1]
-
-		temp = np.fromfunction(np.vectorize(lambda x, y: self.phi(sca_ind, y)), (1, self.n), dtype=int)
-		self.M_[sca_ind, :] = temp
-		self.M_[:, sca_ind] = np.transpose(temp)
-
 		self.transform_list.append(self.current)
-		self.active[dif_ind] = False
+		self.active[self.current[1]] = False
 
-	@staticmethod
-	def default_psi (x, y, z):
-		return np.abs(x) / np.sqrt(np.abs(y * z))

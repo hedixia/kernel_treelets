@@ -36,8 +36,7 @@ timelist.append(time.time())
 iterations = 10
 for i in range(iterations):
 	print("iteration:", i)
-	ktc = kernel_treelet_clustering(None)
-	# ktc = kernel_treelet_clustering('poly', 30, 500, _gamma_=1, coef0=1, degree=4)
+	ktc = kernel_treelet_clustering('poly', 30, 500, _gamma_=1, coef0=1, degree=4, verbose=True)
 	print(ktc.kernel_name)
 	pred = np.zeros(test_y.shape)
 	if ktc.kernel_name is None:
