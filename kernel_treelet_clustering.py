@@ -52,7 +52,7 @@ class kernel_treelet_clustering(kernel_treelet):
 			self.raw_dataset = X  # origional copy
 
 			# draw a small sample
-			self.sample_index = np.random.choice(self.raw_dataset.shape[0], self.max_sample, replace=False)
+			self.sample_index = np.sort(np.random.choice(self.raw_dataset.shape[0], self.max_sample, replace=False))
 			self.dataset = self.raw_dataset[self.sample_index, :]
 
 			# build model on small sample
@@ -60,8 +60,12 @@ class kernel_treelet_clustering(kernel_treelet):
 			coef_dict = {key: self.coef_dict[key] for key in self.coef_dict if key in SVCkeys}
 
 			# generalize to large sample with SVM
-			self.svm = SVC(kernel=self.kernel_name, **coef_dict)
-			self.svm.fit(self.dataset, self._labels_)
+			try:
+				self.svm = SVC(kernel=self.kernel_name, **coef_dict)
+				self.svm.fit(self.dataset, self._labels_)
+			except ValueError:
+				self.svm = SVC()
+				self.svm.fit(self.dataset, self._labels_)
 			self._labels_ = self.svm.predict(self.raw_dataset)
 
 	def find_clust_num (self, dendrogram_list):

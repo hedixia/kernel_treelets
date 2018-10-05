@@ -7,7 +7,7 @@ import sklearn
 class kernel_treelet:
 	def __init__ (self, kernel=False, **kwargs):
 		# Input Variables
-		self.kernel_name = kernel
+		self.kernel_name = kernel if type(kernel) is str else kernel.__class__.__name__
 		self._kernel = self._input_kernel(kernel)
 		self.__dict__.update(kwargs)
 		self.coef_dict = kwargs
@@ -38,7 +38,7 @@ class kernel_treelet:
 		n = self.__X.shape[0]
 		if k < 0:
 			k += n
-		if self._kernel_matrix_function(0,0):
+		if self._kernel_matrix_function(0, 0):
 			A_0 = np.fromfunction(self._kernel_matrix_function, shape=(n, n), dtype=int)
 		else:
 			A_0 = self._kernel(self.__X)
@@ -46,8 +46,9 @@ class kernel_treelet:
 		self._trl.fit(A_0)
 		A_k = self.transform(self.transform(self.A_0.getT(), k).getT(), k)
 		self.A_k = A_k
-		#self.L_k = self._decomp(A_k)
-		#self.Delta_k = self.transform(np.identity(A_0.shape[0])) * self.L_k
+
+	# self.L_k = self._decomp(A_k)
+	# self.Delta_k = self.transform(np.identity(A_0.shape[0])) * self.L_k
 
 	def transform (self, v, k=1):
 		v = np.matrix(v)

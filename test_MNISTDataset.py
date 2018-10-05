@@ -1,10 +1,11 @@
-import numpy as np
+import collections
 import os
-import csv
-from sklearn.svm import LinearSVC, SVC
 import struct
 import time
-import collections
+
+import numpy as np
+from sklearn.svm import LinearSVC
+
 from kernel_treelet_clustering import kernel_treelet_clustering
 
 timelist = []
