@@ -40,7 +40,7 @@ class kernel_treelet_clustering(kernel_treelet):
 			self.dataset = X
 			super().fit(self.dataset, k)
 
-			# clustering on sample dataset
+			# clustering on dataset
 			self.tree = self._trl.tree
 			if self.clustnum_estimate:
 				self.find_clust_num(self._trl.dendrogram_list)
@@ -50,10 +50,16 @@ class kernel_treelet_clustering(kernel_treelet):
 
 		else:  # large dataset
 			self.raw_dataset = X  # origional copy
-			self.sample_index = np.arange(self.max_sample)  # sampling
-			self.dataset = self.raw_dataset[self.sample_index, :]  # small sample
-			self.fit(self.dataset, k)  # model on sample dataset
+
+			# draw a small sample
+			self.sample_index = np.random.choice(self.raw_dataset.shape[0], self.max_sample, replace=False)
+			self.dataset = self.raw_dataset[self.sample_index, :]
+
+			# build model on small sample
+			self.fit(self.dataset, k)
 			coef_dict = {key: self.coef_dict[key] for key in self.coef_dict if key in SVCkeys}
+
+			# generalize to large sample with SVM
 			self.svm = SVC(kernel=self.kernel_name, **coef_dict)
 			self.svm.fit(self.dataset, self._labels_)
 			self._labels_ = self.svm.predict(self.raw_dataset)

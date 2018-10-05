@@ -1,12 +1,13 @@
 import numpy as np
 
 import treelet
+import sklearn
 
 
 class kernel_treelet:
 	def __init__ (self, kernel=False, **kwargs):
 		# Input Variables
-		self.kernel_name = kernel if kernel else 'linear'
+		self.kernel_name = kernel
 		self._kernel = self._input_kernel(kernel)
 		self.__dict__.update(kwargs)
 		self.coef_dict = kwargs
@@ -37,13 +38,16 @@ class kernel_treelet:
 		n = self.__X.shape[0]
 		if k < 0:
 			k += n
-		A_0 = np.fromfunction(self._kernel_matrix_function, shape=(n, n), dtype=int)
+		if self._kernel_matrix_function(0,0):
+			A_0 = np.fromfunction(self._kernel_matrix_function, shape=(n, n), dtype=int)
+		else:
+			A_0 = self._kernel(self.__X)
 		self.A_0 = np.matrix(A_0)
 		self._trl.fit(A_0)
 		A_k = self.transform(self.transform(self.A_0.getT(), k).getT(), k)
 		self.A_k = A_k
-		self.L_k = self._decomp(A_k)
-		self.Delta_k = self.transform(np.identity(A_0.shape[0])) * self.L_k
+		#self.L_k = self._decomp(A_k)
+		#self.Delta_k = self.transform(np.identity(A_0.shape[0])) * self.L_k
 
 	def transform (self, v, k=1):
 		v = np.matrix(v)
@@ -74,14 +78,17 @@ class kernel_treelet:
 		return L
 
 	def _kernel_matrix_function (self, x, y):
-		return self._kernel(self.__X[x, :], self.__X[y, :])
+		try:
+			return self._kernel(self.__X[x, :], self.__X[y, :])
+		except TypeError:
+			return False
 
 	def _input_kernel (self, kernel):  # return a kernel function f:SxS->R
 		if kernel == "rbf":
 			kernel = self._rbf
 		if kernel == "poly":
 			kernel = self._poly
-		if kernel == False:
+		if kernel == "linear":
 			kernel = self._linear
 		return kernel
 
@@ -91,19 +98,18 @@ class kernel_treelet:
 			return self._gamma_
 		if hasattr(self, 'sigma'):
 			self._gamma_ = 1 / 2 / self.sigma / self.sigma
-
-		return self._gamma_
+			return self._gamma_
 
 	@staticmethod
 	def _linear (x, y):  # Linear Kernel
 		return (np.asarray(x) * np.asarray(y)).sum(axis=-1)
 
-	def _rbf (self, x, y):  # Radial Basis Function Kernel
-		diff = np.linalg.norm(np.asarray(x) - np.asarray(y), axis=-1)
+	def _rbf (self, X):  # Radial Basis Function Kernel
+		diff = sklearn.metrics.pairwise.euclidean_distances(X)
 		return np.exp(- diff * diff * self.gamma)
 
-	def _poly (self, x, y):  # Polynomial Kernel
-		return ((np.asarray(x) * np.asarray(y)).sum(axis=-1) * self.gamma + self.coef0) ** self.degree
+	def _poly (self, X):  # Polynomial Kernel
+		return (np.inner(X, X) * self.gamma + self.coef0) ** self.degree
 
 
 KT = kernel_treelet

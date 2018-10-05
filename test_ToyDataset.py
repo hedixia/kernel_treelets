@@ -170,7 +170,7 @@ for i_dataset, (dataset, algo_params) in enumerate(datasets):
 
 	other_alg = [
 		('MiniBatchKMeans', two_means),
-		('AffinityPropagation', affinity_propagation),
+		#('AffinityPropagation', affinity_propagation),
 		('MeanShift', ms),
 		('SpectralClustering', spectral),
 		('Ward', ward),
@@ -192,7 +192,7 @@ for i_dataset, (dataset, algo_params) in enumerate(datasets):
 	]
 
 	# clustering_algorithms = other_alg + KT_alg
-	clustering_algorithms = other_alg[:0] + KT_alg
+	clustering_algorithms = other_alg+ KT_alg[:1]
 
 	for name, algorithm in clustering_algorithms:
 		t0 = time.time()
