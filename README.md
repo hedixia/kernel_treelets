@@ -2,7 +2,7 @@
 
 This repo is under construction. It can be used temporarily by copying all .py files to the folder containing executed file. 
 
-Kernel Treelet is an algorithm by combining Kernel Method and Treelet algorithm. The document is still in-progress. 
+Kernel Treelets is an algorithm by combining Kernel Method and Treelet algorithm. The document is still in-progress. 
 
 For more infomation about Kernel Method, see https://en.wikipedia.org/wiki/Kernel_method
 
