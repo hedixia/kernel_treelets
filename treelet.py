@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def jacobi_rotation (M, k, l, tol=0.00000000001):
+def jacobi_rotation (M, k, l, tol=10**(-11)):
 	"""
 	input: numpy matrix for rotation M, two different row number k and l 
 	output: cos and sin value of rotation 
