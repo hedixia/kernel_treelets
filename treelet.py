@@ -77,9 +77,9 @@ class treelet:
 	def _rotate (self, multi=False):
 		if multi:
 			for i in range(multi):
-				if self.verbose:
-					print("rotation: ", i)
 				self._rotate()
+				if self.verbose:
+					print("rotation: ", i, "\tcurrent: ", self.current)
 			self.dfrk = [self.transform_list[i][1] for i in range(self.n - 1)]
 			self.dfrk.append(self.transform_list[-1][0])
 		else:
@@ -111,8 +111,8 @@ class treelet:
 		return self.max_row[k], k
 
 	def _max (self, col_num):
-		temp = np.abs(self.M_[col_num] * self.active)
-		temp[col_num] = 0
+		temp = np.abs(self.M_[col_num]) * (self.active - 0.5)
+		temp[col_num] = -1
 		self.max_row[col_num] = np.argmax(temp)
 		self.max_row_val[col_num] = self.M_[self.max_row[col_num], col_num]
 
@@ -124,4 +124,3 @@ class treelet:
 
 		self.transform_list.append(self.current)
 		self.active[self.current[1]] = False
-

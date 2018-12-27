@@ -10,10 +10,9 @@ SVCkeys = inspect.signature(SVC.__init__).parameters.keys()
 
 
 class kernel_treelet_clustering(kernel_treelet):
-	def __init__ (self, kernel=False, number_of_clusters=0, max_sample=500, dropout=0, label_type=None, verbose=False, **kwargs):
+	def __init__ (self, kernel=False, number_of_clusters=0, max_sample=500, label_type=None, verbose=False, **kwargs):
 		super().__init__(kernel, verbose=verbose, **kwargs)
 		self.max_sample = max_sample
-		self.dropout = dropout
 		self.tiny_cluster_number = 0
 		self.label_type = label_type
 
@@ -45,7 +44,7 @@ class kernel_treelet_clustering(kernel_treelet):
 			if self.clustnum_estimate:
 				self.find_clust_num(self._trl.dendrogram_list)
 
-			self._labels_ = self._del_small_clust()
+			self._labels_ = self.get_labels()
 			self.sample_labels = np.array(self._labels_, copy=True)
 
 		else:  # large dataset
@@ -58,6 +57,12 @@ class kernel_treelet_clustering(kernel_treelet):
 			# build model on small sample
 			self.fit(self.dataset, k)
 			coef_dict = {key: self.coef_dict[key] for key in self.coef_dict if key in SVCkeys}
+
+			temp = np.unique(self._labels_, return_counts=True)
+			valid_labels = np.isin(self._labels_, temp[0][np.argsort(temp[1])][-self.number_of_clusters:])
+
+			self.dataset = self.dataset[valid_labels]
+			self._labels_ = self._labels_[valid_labels]
 
 			# generalize to large sample with SVM
 			try:
@@ -75,27 +80,10 @@ class kernel_treelet_clustering(kernel_treelet):
 				self.number_of_clusters = len(self) - i
 				return self.number_of_clusters
 
-	def _del_small_clust (self):
+	def get_labels (self):
 		temp_labels = np.arange(self.n)
-		for i in range(self.n - self.number_of_clusters):
-			temp_labels[self.tree[i][1]] = self.tree[i][0]
-		for i in range(self.n):
-			current = i
-			while current != temp_labels[current]:
-				current = temp_labels[current]
-			ending = current
-			current = i
-			while current != ending:
-				temp_labels[current] = ending
-				current = temp_labels[current]
-		if not self.clustnum_estimate:
-			if self.dropout is not 0:
-				counts = np.unique(temp_labels, return_counts=True)[1]
-				tiny_clust_num = (counts < self.dropout).sum()
-				if self.tiny_cluster_number < tiny_clust_num:
-					self.number_of_clusters += tiny_clust_num - self.tiny_cluster_number
-					self.tiny_cluster_number = tiny_clust_num
-					self._del_small_clust()
+		for i in range(self.n - self.number_of_clusters - 1, -1, -1):
+			temp_labels[self.tree[i][1]] = temp_labels[self.tree[i][0]]
 		return temp_labels
 
 	@property
