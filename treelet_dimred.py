@@ -23,8 +23,8 @@ class treelet_dimred(treelet):
 	def transform (self, v, k=False, epsilon=0):
 		v = np.matrix(v) - self.mean_
 		k = k if k else 1
-		for iter in range(self.n - k):
-			(scv, cgs, cos_val, sin_val) = self.transform_list[iter]
+		for iter_ in range(self.n - k):
+			(scv, cgs, cos_val, sin_val) = self.transform_list[iter_]
 			temp_scv = cos_val * v[:, scv] - sin_val * v[:, cgs]
 			temp_cgs = sin_val * v[:, scv] + cos_val * v[:, cgs]
 			v[:, scv] = temp_scv
@@ -43,8 +43,8 @@ class treelet_dimred(treelet):
 		v = np.matrix(np.zeros((scaling_part.shape[0], self.n)))
 		for i in range(k, self.n):
 			v[:, self.dfrk[i]] = scaling_part[:, i - k]
-		for iter in reversed(self.transform_list):
-			(scv, cgs, cos_val, sin_val) = iter
+		for iter_ in reversed(self.transform_list):
+			(scv, cgs, cos_val, sin_val) = iter_
 			temp_scv = cos_val * v[:, scv] + sin_val * v[:, cgs]
 			temp_cgs = -sin_val * v[:, scv] + cos_val * v[:, cgs]
 			v[:, scv] = temp_scv
@@ -57,7 +57,7 @@ class treelet_dimred(treelet):
 	#def
 
 	def cluster (self, k):
-		clust_list = list(range(self.n))
+		clust_list = np.arange(self.n)
 		for i in range(self.n - k, -1, -1):
 			clust_list[self.transform_list[i][1]] = clust_list[self.transform_list[i][0]]
 		return clust_list
