@@ -7,7 +7,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.sparse import coo_matrix
 
-from kernel_treelet_clustering import kernel_treelet_clustering
+from kernel_treelets_clustering import kernel_treelets_clustering
 
 timelist = []
 timelist.append(time.time())
@@ -39,13 +39,13 @@ class nan_kernel_rbf:
 		return np.exp(- diff * diff * self.gamma)
 
 
-ktc = kernel_treelet_clustering(nan_kernel(1), number_of_clusters=5, max_sample=2000, verbose=True)
+ktc = kernel_treelets_clustering(nan_kernel(1), number_of_clusters=5, max_sample=2000, verbose=True)
 ktc.fit(dataset)
 print(ktc.labels_)
 print(Counter(ktc.labels_))
 
 timelist.append(time.time())
-ktc = kernel_treelet_clustering(nan_kernel_rbf(0.125), number_of_clusters=15, max_sample=2000, verbose=True)
+ktc = kernel_treelets_clustering(nan_kernel_rbf(0.125), number_of_clusters=15, max_sample=2000, verbose=True)
 ktc.fit(dataset.T)
 timelist.append(time.time())
 print(ktc.labels_)
@@ -72,7 +72,7 @@ def pairwise_counting (PC, TC):
 	TN = D ** 2 - TP - FN - FP - D
 	return (TN, FP, FN, TP)
 
-"""
+
 L1 = []
 L2 = []
 plabels = np.arange(1080, dtype=int)
@@ -105,8 +105,8 @@ fp = L1[1] / (L1[0] + L1[1])
 L2 = np.transpose(L2+[(1,0,1,0)])
 tp2 = L2[3] / (L2[3] + L2[2])
 fp2 = L2[1] / (L2[0] + L2[1])
-plt.xlabel("False Positive")
-plt.ylabel("True Positive")
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
 plt.title("ROC Curve of Clustering on MPE Data Set")
 p1 = plt.plot(fp, tp)
 p2 = plt.plot(fp2, tp2)
@@ -151,4 +151,4 @@ plt.title("V Measure Scores of Clustering on MPE Data Set")
 p1 = plt.plot(L1)
 p2 = plt.plot(L2)
 plt.legend((p1[0], p2[0]), ("KT", "KMeans"), loc="lower right")
-plt.show()
+plt.show()"""

@@ -34,7 +34,7 @@ from sklearn import cluster, datasets, mixture
 from sklearn.neighbors import kneighbors_graph
 from sklearn.preprocessing import StandardScaler
 from itertools import cycle, islice
-from kernel_treelet_clustering import kernel_treelet_clustering
+from kernel_treelets_clustering import kernel_treelets_clustering
 from sklearn.decomposition import PCA
 
 cmaps = [
@@ -144,14 +144,19 @@ for i_dataset, (dataset, algo_params) in enumerate(datasets):
 	birch = cluster.Birch(n_clusters=params['n_clusters'])
 	gmm = mixture.GaussianMixture(
 		n_components=params['n_clusters'], covariance_type='full')
-	kt = kernel_treelet_clustering(kernel='linear', number_of_clusters=params['n_clusters'], label_type=int, )
+	kt = kernel_treelets_clustering(kernel='linear', number_of_clusters=params['n_clusters'], label_type=int, )
 
-	kte1000 = kernel_treelet_clustering(kernel='rbf', sigma=0.1,
-	                                max_sample=1000, label_type=int,
-	                                number_of_clusters=params['n'],
-	                                )
+	kte1000 = kernel_treelets_clustering(kernel='rbf', sigma=0.1,
+	                                     max_sample=1000, label_type=int,
+	                                     number_of_clusters=params['n'],
+	                                     )
 
-	ktp = kernel_treelet_clustering(kernel='poly', sigma=1, degree=2, coef0=0.3, number_of_clusters=params['n_clusters'], label_type=int, max_sample=1000)
+	kte1500 = kernel_treelets_clustering(kernel='rbf', sigma=0.1,
+	                                     max_sample=1500, label_type=int,
+	                                     number_of_clusters=params['n'],
+	                                     )
+
+	ktp = kernel_treelets_clustering(kernel='poly', sigma=1, degree=2, coef0=0.3, number_of_clusters=params['n_clusters'], label_type=int, )
 
 	other_alg = [
 		('MiniBatchKMeans', two_means),
@@ -167,20 +172,20 @@ for i_dataset, (dataset, algo_params) in enumerate(datasets):
 	]
 
 	KT_alg = [
-		('KTrbf', kte1000),
+		('KTrbf', kte1500),
 		('KT', kt),
 		('KTpoly', ktp),
 	]
 
 	KT_num = [
-		('KT' + str(n), kernel_treelet_clustering(kernel='rbf', sigma=0.1,
-	                                    max_sample=n, label_type=int,
-	                                    number_of_clusters=params['n'],
-	                                    )) for n in [50, 100, 200, 300, 500, 800, 1000, 1200, 1499, 1500]
+		('KT' + str(n), kernel_treelets_clustering(kernel='rbf', sigma=0.1,
+		                                           max_sample=n, label_type=int,
+		                                           number_of_clusters=params['n'],
+		                                           )) for n in [50, 100, 200, 300, 500, 800, 1000, 1200, 1499, 1500]
 	]
 
-	# clustering_algorithms = other_alg + KT_alg
-	clustering_algorithms = KT_num
+	clustering_algorithms = KT_alg + other_alg
+	# clustering_algorithms = KT_num
 
 	for iter_ in range(len(clustering_algorithms)):
 		name, algorithm = clustering_algorithms[iter_]
@@ -224,7 +229,7 @@ for i_dataset, (dataset, algo_params) in enumerate(datasets):
 
 		Chart.append('%.3f' % (t1 - t0))
 		plot_num += 1
-		if isinstance(algorithm, kernel_treelet_clustering):
+		if isinstance(algorithm, kernel_treelets_clustering):
 			# high_dim_plot(algorithm.Delta_k, algorithm.sample_labels)
 			print(algorithm.number_of_clusters)
 			from collections import Counter
@@ -235,5 +240,5 @@ plt.show()
 
 Chart = np.asarray(namelist + Chart).reshape(7, -1)
 
-np.savetxt("temp.csv", Chart, fmt='%s', delimiter=',')
+np.savetxt("temp.csv", np.transpose(Chart), fmt='%s', delimiter=' & ')
 print(Chart)

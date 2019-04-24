@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.sparse import coo_matrix
 from sklearn.cluster import AgglomerativeClustering, KMeans
-from kernel_treelet_clustering import kernel_treelet_clustering
+from kernel_treelets_clustering import kernel_treelets_clustering
 
 timelist = []
 timelist.append(time.time())
@@ -36,13 +36,13 @@ def conf_mat (label):
 
 core = 1045
 timelist.append(time.time())
-ktc = kernel_treelet_clustering(network_kernel(core), number_of_clusters=30, max_sample=4039, verbose=True)
+ktc = kernel_treelets_clustering(network_kernel(core), number_of_clusters=30, max_sample=4039, verbose=True)
 ktc.fit(adjmat)
 timelist.append(time.time())
 print(ktc.labels_)
 print(Counter(ktc.labels_))
 print(np.diff(timelist))
-with open(r"C:\Users\Hedi Xia\Desktop\temp\ktc_fb" + str(core), "wb") as output:
+with open(r"C:\Users\Hedi Xia\Desktop\ktc_fb" + str(core), "wb") as output:
 	pickle.dump(ktc, output)
 
 
@@ -92,8 +92,8 @@ def find_val (model_type, **kwargs):
 	return fp, tp
 
 
-plt.xlabel("False Positive")
-plt.ylabel("True Positive")
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
 plt.title("FB Network Data ROC curve (core=1045)")
 methods = [plt.plot(fp, tp)]
 names = ["KT"]
